@@ -135,12 +135,12 @@ function create() {}
 
 function update() {}
 ```
-3. Debo inicializar el juego y en el archivo **game.js**, agrego 
+3. Debo inicializar el juego, en el archivo **game.js** agrego 
 este código antes del `preload` y debajo del `config`:
 ```js
 new Phaser.Game(config);
 ```
-* El cuadrado que repersenta el juego aparece en el browser
+* El cuadrado que representa el juego aparece en el browser
 4. Quitamos del archivo **index.html**, el dato de `<style>`
 relacionado con `#game`.
 5. Descargamos del repositorio original la carpeta 
@@ -169,8 +169,8 @@ function create() {
 ```
 3. Cambiamos el color en **game.js**, en la zona de `config`:  
 `'rgba(255, 255, 255, 0)'` -> `'#009dd8'`.
-4. Como la nube sale de en posición y tamaño incorrecto, cambiamos
-la nuebe por : `this.add.image(0, 0, 'cloud1').setScale(0.15);`.
+4. Como la nube sale en posición y tamaño incorrecto, cambiamos
+la nube por : `this.add.image(0, 0, 'cloud1').setScale(0.15);`.
 5. Sigue apareciendo media nube, porque las posiciones son la
 mitad de la imagen, para q tome el origen de la imagen añadimos 
 `setOrigin`:
@@ -187,3 +187,37 @@ mitad de la imagen, para q tome el origen de la imagen añadimos
 > Los archivos son muestras del 
 >producto terminado, para ser vistos en el repositorio, pero no 
 >hacen parte del código necesario para el juego.
+
+## 04. El recurso de Mario y el Suelo
+1. Añadimos en **games.js** este código en `preload`, para que
+cargue el sprite de Mario:
+```js
+  this.load.spritesheet(
+    'mario',
+    './assets/entities/mario.png',
+    { frameWidth: 18, frameHeight: 16 }
+  );
+```
+2. En `create` de **games.js**, ponemos este código y Mario 
+aparecerá en pantalla:
+```js
+  this.add.sprite(50, 200, 'mario')
+    .setOrigin(0, 0);
+```
+3. En la función `preload` de **games.js**, añadimos este código,
+para cargar el Suelo:
+```js
+  this.load.image(
+    'floorbricks',
+    './assets/scenery/overworld/floorbricks.png'
+  );
+```
+4. Añadimos a `create` de **games.js**, este código y el Suelo
+aparecerá en el juego:
+```js
+  this.add.tileSprite(0, config.height - 32, config.width, 32,
+    'floorbricks')
+    .setOrigin(0, 0);
+```
+5. Movemos la nube a una posición no tan en la esquina con esto:  
+`this.add.image(100, 50, 'cloud1')`
