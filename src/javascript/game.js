@@ -19,12 +19,26 @@ function preload() {
     'cloud1',
     './assets/scenery/overworld/cloud1.png'
   );
+  this.load.spritesheet(
+    'mario',
+    './assets/entities/mario.png',
+    { frameWidth: 18, frameHeight: 16 }
+  );
+  this.load.image(
+    'floorbricks',
+    './assets/scenery/overworld/floorbricks.png'
+  );
 }
 
 function create() {
-  this.add.image(0, 0, 'cloud1')
+  this.add.image(100, 50, 'cloud1')
     .setOrigin(0, 0)
     .setScale(0.15);
+  this.add.sprite(50, 200, 'mario')
+    .setOrigin(0, 0);
+  this.add.tileSprite(0, config.height - 32, config.width, 32,
+    'floorbricks')
+    .setOrigin(0, 0);
 }
 
 function update() { }
