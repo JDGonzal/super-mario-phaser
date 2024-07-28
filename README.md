@@ -36,7 +36,9 @@ de [Alexander](https://marketplace.visualstudio.com/publishers/usernamehw).
     * Path Intellisense
     * Formatting Toggle
   * [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer)
-  de [Ritwick Dey](https://marketplace.visualstudio.com/publishers/ritwickdey)
+  de [Ritwick Dey](https://marketplace.visualstudio.com/publishers/ritwickdey).
+  * [Image preview](https://marketplace.visualstudio.com/items?itemName=kisstkondoros.vscode-gutter-preview)
+  de [Kiss Tamás](https://marketplace.visualstudio.com/publishers/kisstkondoros)
 
 ## 01. Crear el ambiente de trabajo
 
@@ -107,3 +109,81 @@ allí nos aparece el mensaje q dejamos:
     }
   </style>
 ```
+
+## 02. Configuración del juego
+1. En el archivo **game.js**, añadimos este código:
+```js
+/* `Phaser` es una constante global */
+const config ={
+  type: Phaser.AUTO, // webgl, canvas, headless
+  width: 256,
+  height: 244,
+  backgroundColor: 'rgba(255, 255, 255, 0)', // '#FFFFFF',
+  parent: 'game',
+  scene: {
+    preload, // Fn se ejecuta para precargar recursos
+    create, // Fn se ejecuta cuando el juego comienza
+    update // Fn se ejecuta en cada frame
+  }
+}
+```
+2. Creamos las 3 funciones vacías en **game.js**:
+```javascript
+function preload() {}
+
+function create() {}
+
+function update() {}
+```
+3. Debo inicializar el juego y en el archivo **game.js**, agrego 
+este código antes del `preload` y debajo del `config`:
+```js
+new Phaser.Game(config);
+```
+* El cuadrado que repersenta el juego aparece en el browser
+4. Quitamos del archivo **index.html**, el dato de `<style>`
+relacionado con `#game`.
+5. Descargamos del repositorio original la carpeta 
+["assets"](https://github.com/decapapi/Super-Mario-Phaser/tree/main/assets) 
+y la ponemos en la carpeta "src".
+6. Ante el error de q no halla el `favicon.ico`, adicioné en el
+archivo **index.html**, antes del `<title>`, la siguiente línea:  
+`<link rel="shortcut icon" href="./assets/favicon.png" />`.
+
+## 03. Primer Recurso
+1. Cargamos el primer recurso, en este caso una nube 
+**cloud1.png** que está en la carpeta "src/assets/scenery/overworld/" en la función `preload`:
+```js
+function preload() { 
+  this.load.image (
+    'cloud1',
+    './assets/scenery/overworld/cloud1.png'
+  );
+}
+```
+2. En la función `create`, la mostramos en el juego:
+```js
+function create() { 
+  this.add.image(0, 0, 'cloud1');
+}
+```
+3. Cambiamos el color en **game.js**, en la zona de `config`:  
+`'rgba(255, 255, 255, 0)'` -> `'#009dd8'`.
+4. Como la nube sale de en posición y tamaño incorrecto, cambiamos
+la nuebe por : `this.add.image(0, 0, 'cloud1').setScale(0.15);`.
+5. Sigue apareciendo media nube, porque las posiciones son la
+mitad de la imagen, para q tome el origen de la imagen añadimos 
+`setOrigin`:
+```js
+  this.add.image(0, 0, 'cloud1')
+    .setOrigin(0, 0)
+    .setScale(0.15);
+```
+
+>[!IMPORTANT]  
+> Antes de subir el repositorio, borré la carpeta 
+>"src/assets/showcase".
+>
+> Los archivos son muestras del 
+>producto terminado, para ser vistos en el repositorio, pero no 
+>hacen parte del código necesario para el juego.
