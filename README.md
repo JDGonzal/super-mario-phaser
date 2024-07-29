@@ -254,3 +254,53 @@ el personaje con la tecla [`Flecha-derecha`] ➡️
 >[!TIP]  
 > Logramos "Moverlo" entre derecha e izquierda, pero la imagen
 >le falta animación, eso lo veremos mas adelante.
+
+## 06. Las Animaciones
+1. En la función `create` de **game.js**, usando la propiedad
+`anims`, creamos las animaciones usando una clave `key`:
+```js
+  this.anims.create({
+    key: 'mario-walk',    //  ---------> Nombre único o ID
+    frames: this.anims.generateFrameNumbers(
+      'mario',  //  -------------------> ID del `spritesheet`
+      { start: 1, end: 3 }  //  -------> Frames desde y hasta  
+    ),
+    frameRate: 6, //  -----------------> Reduce la velocidad
+    repeat: -1  //  -------------------> Repite infinito
+  });
+```
+2. En el `update` de **game.js**, al momento de decrementar
+la posición `x` del objeto `this.mario`, también aplicamos
+la animación, es decir a la izquierda:
+```js
+    this.mario.anims.play('mario-walk', true);
+```
+3. Lo mismo para el momento de mover a la derecha.
+
+>[!ERROR]  
+> Ahí el detalle es que una vez empieza a moverse, queda en un
+>movimiento perpetuo, de alguna maner el debe detenerse si no 
+>estoy presionando ninguna de las teclas que provoca el 
+>desplazamiento.
+
+4. En la función `create` de **game.js**, ponemos el mario que
+no está haciendo nada:
+```js
+  this.anims.create({
+    key: 'mario-idle',
+    frames:[{ key: 'mario', frame: 0}]
+  });
+```
+5. En el `update` de **game.js**, añadimos un `else`, en caso
+que no se use ni la tecla derecha o izquierda:
+```js
+    else {
+    this.mario.anims.play('mario-idle', true);
+  }
+```
+6. Cuando el Personaje va a la izquierda, este va de espaldas,
+toca es girarlo para que se mueva en otro sentido, con
+`filpX`:  
+`this.mario.flipX = true;`
+7. Y si va a la derecha, se le dice q deje de girar:  
+`this.mario.flipX = false;`
