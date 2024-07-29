@@ -43,14 +43,33 @@ function create() {
 
   this.keys = this.input.keyboard.createCursorKeys();
 
+  this.anims.create({
+    key: 'mario-walk',    //  ---------> Nombre único o ID
+    frames: this.anims.generateFrameNumbers(
+      'mario',  //  -------------------> ID del `spritesheet`
+      { start: 1, end: 3 }  //  -------> Frames desde y hasta  
+    ),
+    frameRate: 6, //  -----------------> Reduce la velocidad
+    repeat: -1  //  -------------------> Repite infinito
+  });
+  this.anims.create({
+    key: 'mario-idle',
+    frames:[{ key: 'mario', frame: 0}]
+  });
 }
 
 function update() {
   if (this.keys.left.isDown) {
     // Movemos a mario en el Eje `x` a menos 2 ⬅️ 
+    this.mario.anims.play('mario-walk', true);
     this.mario.x -= 2;
+    this.mario.flipX = true;
   } else if (this.keys.right.isDown) {
     // Movemos a mario en el Eje `x` mas 2  ➡️
+    this.mario.anims.play('mario-walk', true);
     this.mario.x += 2;
+    this.mario.flipX = false;
+  } else {
+    this.mario.anims.play('mario-idle', true);
   }
 }
