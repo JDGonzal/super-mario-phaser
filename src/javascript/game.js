@@ -28,17 +28,29 @@ function preload() {
     'floorbricks',
     './assets/scenery/overworld/floorbricks.png'
   );
+
 }
 
 function create() {
   this.add.image(100, 50, 'cloud1')
     .setOrigin(0, 0)
     .setScale(0.15);
-  this.add.sprite(50, 200, 'mario')
+  this.mario = this.add.sprite(50, 200, 'mario')
     .setOrigin(0, 0);
   this.add.tileSprite(0, config.height - 32, config.width, 32,
     'floorbricks')
     .setOrigin(0, 0);
+
+  this.keys = this.input.keyboard.createCursorKeys();
+
 }
 
-function update() { }
+function update() {
+  if (this.keys.left.isDown) {
+    // Movemos a mario en el Eje `x` a menos 2 ⬅️ 
+    this.mario.x -= 2;
+  } else if (this.keys.right.isDown) {
+    // Movemos a mario en el Eje `x` mas 2  ➡️
+    this.mario.x += 2;
+  }
+}
