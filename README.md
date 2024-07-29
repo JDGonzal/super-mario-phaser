@@ -68,7 +68,7 @@ de [Alexander](https://marketplace.visualstudio.com/publishers/usernamehw).
 7. Añadimos un `<footer></footer>` debajo del 
 `</body>`.
 8. Descargamos de este sitio [Phaser v3.x](https://phaser.io/download/stable), con el botón
-[**phaser.in.js**].
+[**phaser.min.js**].
 9. El archivo descargado lo muevo a la carpeta del proyecto llamada "src/javascript".
 10. Lo renombro con la versión con la que fue descargada de **phaser.min.js** a **phaser-3-8-1.min.js**.
 11. En el `<footer>` del **index.html**, ponemos el
@@ -221,3 +221,36 @@ aparecerá en el juego:
 ```
 5. Movemos la nube a una posición no tan en la esquina con esto:  
 `this.add.image(100, 50, 'cloud1')`
+
+## 05. Mover el Personaje
+1. Añadimos el método para reconocer las teclas llamado:
+`createCursorKeys()` , en la función `create` de **game.js**:
+```js
+  this.keys = this.input.keyboard.createCursorKeys();
+```
+2. Cuando creamos el sprite con el id de `'mario'`, faltó 
+asociarlo a un objeto, en la función `create` de **game.js**,
+así se haría la corrección:
+```js
+  this.mario = this.add.sprite(50, 200, 'mario')
+    .setOrigin(0, 0);
+```
+3. En la función `update` de **game.js**, ponemos una 
+condición relacionada con la tecla [`Flecha-izquierda`] ⬅️.
+```js
+  if (this.keys.left.isDown) {
+    // Movemos a mario en el Eje `x` a menos 2 ⬅️ 
+    this.mario.x -= 2;
+  }
+```
+4. En la misma `update`, añadimos el `else if` para mover
+el personaje con la tecla [`Flecha-derecha`] ➡️
+```js
+   else if (this.keys.right.isDown) {
+    // Movemos a mario en el Eje `x` mas 2  ➡️
+    this.mario.x += 2;
+  }
+```
+>[!TIP]  
+> Logramos "Moverlo" entre derecha e izquierda, pero la imagen
+>le falta animación, eso lo veremos mas adelante.
