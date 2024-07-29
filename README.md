@@ -277,9 +277,9 @@ la animación, es decir a la izquierda:
 ```
 3. Lo mismo para el momento de mover a la derecha.
 
->[!ERROR]  
+>[!CAUTION]  
 > Ahí el detalle es que una vez empieza a moverse, queda en un
->movimiento perpetuo, de alguna maner el debe detenerse si no 
+>movimiento perpetuo, de alguna manera el debe detenerse si no 
 >estoy presionando ninguna de las teclas que provoca el 
 >desplazamiento.
 
@@ -304,3 +304,84 @@ toca es girarlo para que se mueva en otro sentido, con
 `this.mario.flipX = true;`
 7. Y si va a la derecha, se le dice q deje de girar:  
 `this.mario.flipX = false;`
+
+## 07. Animación de Saltar
+1. En la función `create` de **game.js**, ponemos el mario que
+no está haciendo nada:
+```js
+  this.anims.create({
+    key: 'mario-jump',
+    frames:[{ key: 'mario', frame: 5}]
+  });
+```
+2. En el `update` de **game.js**, añadimos aparte una condición
+conla tecla [`Flecha-arriba`] ⬆️
+```js
+  if (this.keys.up.isDown){
+    // Movemos a mario en el Eje `x` a menos 5  ⬆️
+    this.mario.y -= 5;
+    this.mario.anims.play('mario-jump', true);
+  }
+```
+
+>[!WARNING]  
+>Como no hay gravedad el seguirá subiendo sin caer.
+
+## 08. Físicas
+1. En el `config` de **game.js**, añadimos un elemento de 
+`physics`:
+```js
+const config = {
+  ...,
+  physics: {
+    default: 'arcade',  // box2d, chipmunk, ninja, p2
+    arcade: {
+      gravity: { y: 300 },
+      debug: false
+    }
+  },
+  ...
+}
+```
+2. En el `create` de **game.js**, comentamos la forma de
+mostar a `mario` y le añadimos esta, cambiando también
+la posición inicial del `mario`:
+```js
+  this.mario = this.physics.add
+    .sprite(50, config.height - 16 * 4, 'mario')
+    .setOrigin(0, 0);
+```
+>[!TIP]  
+> Mario se cae, si, pero detrás de los ladrillos del piso.
+> Para solucionar, cambiamos el orden en `create`:
+> 1. `this.add.image(..., 'cloud1') ...`
+> 2. `this.add.tileSprite(..., 'floorbricks') ...`
+> 3. `this.mario = this.physics.add.sprite(..., 'mario') ...`
+
+3. Creamos un objeto llamado `floor` con el método 
+`staticGroup()` en `create`:
+```js
+  this.floor = this.physics.add.staticGroup();
+```
+4. El objeto `floor` lo utilizamos para crear uno o dos pisos:
+```js
+  this.floor
+    .create(0, config.height - 32, 'floorbricks')
+    .setOrigin(0,0);
+```
+5. Comentamos el otro `'floorbricks'` de `create`.
+6. Añadimos otro piso en una posición mas adelante:
+```js
+  this.floor
+    .create(160, config.height - 32, 'floorbricks')
+    .setOrigin(0, 0);
+```
+7. El mario se sigue cayendo, se debe crear una colisión
+que es el método `collider` en la función `create`, lo
+hacemos antes de la definición de `keys`:
+```js
+  this.physics.add.collider(this.mario, this.floor);
+```
+8. El `mario` aparece flotando y si se mueve se cae
+directamente, entonces se añade a los dos `floor` en
+la función `create`, el método `refreshBody()`.
