@@ -385,3 +385,21 @@ hacemos antes de la definición de `keys`:
 8. El `mario` aparece flotando y si se mueve se cae
 directamente, entonces se añade a los dos `floor` en
 la función `create`, el método `refreshBody()`.
+
+## 09. Evitar que mario se salga del universo
+1. Añadir en `create` para el objeto `mario`, este método:
+`setCollideWorldBounds(true)`.
+>[!TIP]  
+>Lo gracioso es q cuando llegue a la separación de los pisos
+>tampoco se caerá 😅  
+>Mas adelante se solucionará este tema.
+
+## 10. Salto mas natural
+1. Añadimos a la condición de la función `update` para la tecla
+ [`Flecha-arriba`] ⬆️ que `mario` esté tocando el piso:
+`if (this.keys.up.isDown && this.mario.body.touching.down) {`
+2. Cambiamos el hecho de ponerle una posición en el eje `y`, 
+para establecer una velocidad negativa:
+`this.mario.setVelocityY(-300);`
+3. En el `create` al objeto `mario` le añadimos `setGravityY`.
+

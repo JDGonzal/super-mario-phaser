@@ -64,7 +64,9 @@ function create() {
   //   .setOrigin(0, 0);
   this.mario = this.physics.add
     .sprite(50, config.height - 16 * 4, 'mario')
-    .setOrigin(0, 0);
+    .setOrigin(0, 0)
+    .setCollideWorldBounds(true)
+    .setGravityY(500);
 
   this.physics.add.collider(this.mario, this.floor);
 
@@ -104,9 +106,9 @@ function update() {
     this.mario.anims.play('mario-idle', true);
   }
 
-  if (this.keys.up.isDown) {
-    // Movemos a mario en el Eje `x` a menos 5  ⬆️
-    this.mario.y -= 5;
+  if (this.keys.up.isDown && this.mario.body.touching.down) {
+    // Movemos a mario en el Eje `y` a -300 de velocidad  ⬆️
+    this.mario.setVelocityY(-300);
     this.mario.anims.play('mario-jump', true);
   }
 }
