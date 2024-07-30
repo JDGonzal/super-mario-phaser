@@ -1,4 +1,6 @@
 /* `Phaser` es una constante global */
+import { createAnimations } from "./animations.js";
+
 const config = {
   type: Phaser.AUTO, // webgl, canvas, headless
   width: 256,
@@ -34,6 +36,11 @@ function preload() {
   this.load.image(
     'floorbricks',
     './assets/scenery/overworld/floorbricks.png'
+  );
+
+  this.load.audio(
+    'gameover',
+    './assets/sound/music/gameover.mp3'
   );
 
 }
@@ -74,7 +81,7 @@ function create() {
   //   .setOrigin(0, 0);
   this.mario = this.physics.add
     .sprite(50, config.height - 16 * 4, 'mario')
-    .setOrigin(0, 0)
+    .setOrigin(0, 1)
     .setCollideWorldBounds(true)
     .setGravityY(500);
 
@@ -88,26 +95,13 @@ function create() {
 
   this.keys = this.input.keyboard.createCursorKeys();
 
-  this.anims.create({
-    key: 'mario-walk',    //  ---------> Nombre único o ID
-    frames: this.anims.generateFrameNumbers(
-      'mario',  //  -------------------> ID del `spritesheet`
-      { start: 1, end: 3 }  //  -------> Frames desde y hasta  
-    ),
-    frameRate: 6, //  -----------------> Reduce la velocidad
-    repeat: -1  //  -------------------> Repite infinito
-  });
-  this.anims.create({
-    key: 'mario-idle',
-    frames: [{ key: 'mario', frame: 0 }]
-  });
-  this.anims.create({
-    key: 'mario-jump',
-    frames: [{ key: 'mario', frame: 5 }]
-  });
+  createAnimations(this);
+
 }
 
 function update() {
+  if (this.mario.isDead) return;
+
   if (this.keys.left.isDown) {
     // Movemos a mario en el Eje `x` a menos 2 ⬅️ 
     this.mario.x -= 2;
@@ -126,5 +120,24 @@ function update() {
     // Movemos a mario en el Eje `y` a -300 de velocidad  ⬆️
     this.mario.setVelocityY(-300);
     this.mario.anims.play('mario-jump', true);
+  }
+
+  if (this.mario.y >= config.height - 12) {
+    //  La muerte de `mario`
+    this.mario.isDead = true;
+    this.mario.anims.play('mario-dead', false);
+    this.mario.setCollideWorldBounds(false);
+    this.sound.add(
+      'gameover',
+      { volume: 0.2 })
+      .play();
+
+    setTimeout(() => {
+      this.mario.setVelocityY(-250);
+    }, 100);
+
+    setTimeout(() => {
+      this.scene.restart();
+    }, 7000);
   }
 }

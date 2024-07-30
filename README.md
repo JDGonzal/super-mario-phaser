@@ -419,3 +419,140 @@ código en **game.js**, para la función `create`:
 ```js
   this.cameras.main.startFollow(this.mario);
 ```
+4. Como el mundo ya se expandió, aprovechamos para poner mas
+suelo de ladrillos, a la derecha en la función `create`:
+```js
+  this.floor
+    .create(320, config.height - 32, 'floorbricks')
+    .setOrigin(0, 0)
+    .refreshBody();
+
+  this.floor
+    .create(480, config.height - 32, 'floorbricks')
+    .setOrigin(0, 0)
+    .refreshBody();
+```
+
+## 12. Separar las Animaciones
+1. Crear el archivo **animations.js** en la carpeta
+ "src/javascript", en este código base:
+```js
+export const createAnimations = (game) => {
+
+}
+```
+2. En el archivo **game.js**, importamos el `createAnimations`:
+```js
+import { createAnimations } from "./animations.js";
+```
+3. En la función `create` de **game.js**, añadimos el nuevo
+`createAnimations` enviando el `this`, justo debajo de la
+asignación del objeto `keys`.
+4. Cortamos todo lo q se relaciona con `anims` y lo llevamos
+a el nuevo archivo **animations.js**.
+5. En el archivo **animations.js**, cambiamos el término 
+`this` por `game`:
+```js
+export const createAnimations = (game) => {
+  game.anims.create({
+    key: 'mario-walk',    //  ---------> Nombre único o ID
+    frames: game.anims.generateFrameNumbers(
+      'mario',  //  -------------------> ID del `spritesheet`
+      { start: 1, end: 3 }  //  -------> Frames desde y hasta  
+    ),
+    frameRate: 6, //  -----------------> Reduce la velocidad
+    repeat: -1  //  -------------------> Repite infinito
+  });
+  game.anims.create({
+    key: 'mario-idle',
+    frames: [{ key: 'mario', frame: 0 }]
+  });
+  game.anims.create({
+    key: 'mario-jump',
+    frames: [{ key: 'mario', frame: 5 }]
+  });
+}
+```
+6. En el archivo **animations.js** agregamos una nueva para
+la muerte de `mario`, llamada `mario-dead`:
+```js
+  game.anims.create({
+    key: 'mario-dead',
+    frames: [{ key: 'mario', frame: 4 }]
+  });
+```
+7. En el archivo **game.js**, para función `update` al final
+añadimos esto:
+```js
+  if (this.mario.y >= config.height - 12) {
+    //  La muerte de `mario`
+    this.mario.anims.play('mario-dead', false);
+  }
+```
+>[!WARNING]  
+>El `mario` no muestra la animación de la muerte, cuando está
+>cayendo, esto es debido que el mario está creado como 
+>punto de partida la esquina superior izquierda, para el
+>juego, debemos tomar la esquina inferior izquierda, para hacer
+>esto, en la creación del objeto `mario`, cambiamos el 
+>`setOrigin` a esto:  
+>`.setOrigin(0, 1)`
+
+8. Adicionamos una propiedad `isDead`, al objeto `mario`, 
+y lo llenamos con el valor de `true`:
+```js
+  this.mario.isDead = true;
+```
+9. También desactivamos el límite del mundo, para que termine
+de caer:
+```js
+  this.mario.setCollideWorldBounds(false);
+```
+10. Como el `mario` se puede mover estando muerto, justo al
+inicio de la función `update`, ponemos un `return`. 
+```js
+if (this.mario.isDead) return;
+```
+11. El `mario` cuando se muere, hace un salto pequeño, esto lo 
+podemos programar en un intervalo de tiempo, dentro de la
+misma condición de que `mario` está en caída:
+```js
+    setTimeout(() => {
+      this.mario.setVelocityY(-250);
+    }, 100);
+```
+
+## 13. Agregamos un Audio
+1. Vamos a agregar al menos el audio de la muerte de `mario`,
+en el archivo **game.js** en la función `preload` añadimos 
+esto:
+```js
+  this.load.audio(
+    'gameover',
+    './assets/sound/music/gameover.mp3'
+  );
+```
+2. Justo depués de `this.mario.setCollideWorldBounds(false);`
+ponemos el sonido del `'gameover'` en la función `update`, 
+de una vez con el control de volúmen:
+```js
+    this.sound.add(
+      'gameover',
+      { volume: 0.2 })
+      .play();
+```
+3. Justo depués reiniciamos el juego, luego de un intervalo
+de 7 segundos, lo que dura el sonido anterior, en **game.js** al final de la condición de la muerte de `mario`:
+```js
+    setTimeout(() => {
+      this.scene.restart();
+    }, 7000);
+```
+>[!TIP]  
+>En el Browser de Chrome, suena la música del `gameover` sin
+>problemas, pero en Firefox, esta en silencio, hice varias
+>consultas, pero me funcionó el hecho de dar click derecho
+>al tab de Firefox, y seleccionar `mute`, para luego dar 
+>al tab de Firefox, y seleccionar `unmute`.  
+>
+> Aunque algunas veces en Firefox no funciona ☹️.
