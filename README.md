@@ -403,3 +403,19 @@ para establecer una velocidad negativa:
 `this.mario.setVelocityY(-300);`
 3. En el `create` al objeto `mario` le añadimos `setGravityY`.
 
+## 11. La Cámara
+1. Añadimos los límites en el _Mundo_, en el archivo
+**game.js** , para la función `create`, añadimos esto:
+```js
+  this.physics.world.setBounds(0, 0, config.width * 2, config.height);
+```
+2. Ponemos los límites de la _Cámara_, añadiendo esto en la
+función `create`:
+```js
+  this.cameras.main.setBounds(0, 0, config.width * 2, config.height);
+```
+3. Le decimos a la _Cámara_ a quien tiene que seguir, con este
+código en **game.js**, para la función `create`:
+```js
+  this.cameras.main.startFollow(this.mario);
+```
