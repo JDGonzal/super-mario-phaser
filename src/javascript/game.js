@@ -60,6 +60,16 @@ function create() {
     .setOrigin(0, 0)
     .refreshBody();
 
+  this.floor
+    .create(320, config.height - 32, 'floorbricks')
+    .setOrigin(0, 0)
+    .refreshBody();
+
+  this.floor
+    .create(480, config.height - 32, 'floorbricks')
+    .setOrigin(0, 0)
+    .refreshBody();
+
   // this.mario = this.add.sprite(50, 200, 'mario')
   //   .setOrigin(0, 0);
   this.mario = this.physics.add
@@ -69,6 +79,12 @@ function create() {
     .setGravityY(500);
 
   this.physics.add.collider(this.mario, this.floor);
+
+  this.physics.world.setBounds(0, 0, config.width * 2, config.height);
+
+  this.cameras.main.setBounds(0, 0, config.width * 2, config.height);
+
+  this.cameras.main.startFollow(this.mario);
 
   this.keys = this.input.keyboard.createCursorKeys();
 
