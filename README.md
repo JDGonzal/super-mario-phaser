@@ -1,4 +1,4 @@
-# SUPER-MARIO-PHASER
+# SUPER-MARIO-PHASER-01
 Basado en este video: 
 
 ![midulive-20240718](images/2024-07-25_185845.png "Tutorial del juego SUPER MARIO BROS con HTML CSS JavaScript | Curso de Videojuegos")  
@@ -556,3 +556,72 @@ de 7 segundos, lo que dura el sonido anterior, en **game.js** al final de la con
 >al tab de Firefox, y seleccionar `unmute`.  
 >
 > Aunque algunas veces en Firefox no funciona ☹️.
+
+# SUPER-MARIO-PHASER-02
+Basado en este video: 
+
+![midulive-20240718](images/2024-08-02_164203.png "Creando Super Mario Bros: Agregar monedas, colisiones con el enemigo, animaciones y más")  
+https://www.youtube.com/watch?v=kPgDqdCdjfE
+
+## 14. Correcciones de sonido y salto
+1. Algo podremos intentar solucionar con el audio, poniéndolo
+en un `try/catch`, en el método `update` de **game.js**:
+```js
+    try {
+      this.sound.add(
+        'gameover', { volume: 0.2 }).play();
+    } catch (error) {
+      console.log(error);
+    }
+```
+2. Cambiamoe en la configuración de **game.js**, para que
+el auto foco sea falso: `autoFocus: false,`
+3. Mejoramos el salto en **game.js** para el método `update`:
+```js
+    else if (this.mario.body.touching.down) {
+    this.mario.anims.play('mario-idle', true);
+  }
+```
+4. Podemos simplificar a `keys`, `mario`, `sound` y `scene`
+ del `this`, en el código del `update` en **game.js**, 
+ usando esto:  
+`const { keys, mario, sound } = this;`  
+Por ejemplo:
+```js
+function update() {
+  const { keys, mario } = this;
+
+  if (mario.isDead) return;
+
+  if (keys.left.isDown) {
+    ...
+  } else if (keys.right.isDown) {
+    ...
+  } else if (mario.body.touching.down) {
+    ...
+  }
+
+  if (keys.up.isDown && mario.body.touching.down) {
+    ...
+  }
+
+  if (mario.y >= config.height - 12) {
+    ...
+  }
+}
+```
+5. Creamos una constante en `update` de **game.js**, para
+saber si mario esta tocando el piso:  
+`const isMarioTouchingFloor = mario.body.touching.down;`  
+y reemplazamos donde aparece: `mario.body.touching.down`
+6. Aplicamos constantes para las teclas en `update` de
+**game.js**:
+```js
+  const isLeftKeyDown = keys.left.isDown;
+  const isRightKeyDown = keys.right.isDown;
+  const isUpKeyDown = keys.up.isDown;
+```
+7. Al momento de que se llame la animación `mario-walk`, tanto
+a la izquierd como a la derecha, le ponemos un condicional con
+`&&`, ejemplo:  
+`isMarioTouchingFloor && mario.anims.play('mario-walk', true);`
