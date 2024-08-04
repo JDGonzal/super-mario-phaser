@@ -1,6 +1,7 @@
 /* `Phaser` es una constante global */
 import { createAnimations } from './animations.js'
 import { checkControls } from './controles.js'
+import { initAudio, playAudio} from './audio.js'
 
 const config = {
   autoFocus: false,
@@ -37,9 +38,7 @@ function preload () {
     frameHeight: 16
   })
 
-  // -- audios --
-  this.load.audio('gameover', './assets/sound/music/gameover.mp3')
-  this.load.audio('goomba-stomp', './assets/sound/effects/goomba-stomp.wav')
+  initAudio(this)
 }
 
 function create () {
@@ -108,7 +107,7 @@ function onHitEnemy (mario, goomba) {
     goomba.anims.play('goomba-hurt', true)
     goomba.setVelocityX(0)
     mario.setVelocityY(-200).setVelocityX(0)
-    this.sound.play('goomba-stomp')
+    playAudio('goomba-stomp', this)
     // Espero un tiempo para destruirlo
     setTimeout(() => {
       goomba.destroy()
@@ -119,7 +118,7 @@ function onHitEnemy (mario, goomba) {
 }
 
 function update () {
-  const { mario, sound, scene } = this
+  const { mario, scene } = this
 
   checkControls(this)
 
@@ -130,11 +129,7 @@ function update () {
     mario.isDead = true
     mario.anims.play('mario-dead', false)
     mario.setCollideWorldBounds(false)
-    try {
-      sound.add('gameover', { volume: 0.2 }).play()
-    } catch (error) {
-      console.log(error)
-    }
+    playAudio('gameover', this, { volume: 0.2 })
 
     setTimeout(() => {
       mario.setVelocityY(-250)

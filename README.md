@@ -859,7 +859,72 @@ el `preload` de **game.js**:
 le paso mas parámtros :  
 `this.physics.add.collider(this.mario, this.goomba, onHitEnemy, null, this)`
 12. En la función `onHitEnemy`, añado el 
-sonido del aplastamineto de `goomba`:
+sonido del aplastamiento de `goomba`:
 ```js
   this.sound.play('goomba-stomp')
+```
+
+## 17. Refactorizamos Sonidos
+1. Creamos archivo **audio.js** en la carpeta
+"src/javascript"
+2. Creamos dos funciones que se exportan:
+```js
+export const initAudio = ({ load }) => { }
+
+export const playAudio = () => { }
+```
+3. Movemos de `create` de **game.js**, las 2 líneas
+de audio.
+4. Cambiamos en **audio.js** el `this.load`, por
+solo `load`
+5. Importamos las dos funciones en **game.js**:
+```js
+  import { initAudio, playAudio} from './audio.js'
+```
+6. Usamos el `initAudio` en la función `preload`
+de **game.js**:  
+`initAudio(this)`
+7. Cargamos la lista de audios en una constante
+json y simplificamos en **audio.js** su uso:
+```js
+const INIT_AUDIOS = [
+  {
+    key: 'gameover',
+    path: './assets/sound/music/gameover.mp3'
+  },
+  {
+    key: 'goomba-stomp',
+    path: './assets/sound/effects/goomba-stomp.wav'
+  }
+]
+export const initAudio = ({ load }) => {
+  INIT_AUDIOS.forEach(({ key, path }) => {
+    load.audio(key, path)
+  })
+}
+```
+8. El proceso para darle `play` en **audio.js**
+```js
+export const playAudio = (id, { sound }, { volume = 1 } = {}) => {
+  try {
+    return sound.add(id, { volume }).play()
+  } catch (error) {
+    console.error(error)
+  }
+}
+```
+9. En el archivo **game.js** , para la función
+`onHitEnemy` en vez de :  
+`this.sound.play('goomba-stomp')`, ponemos
+`playAudio('goomba-stomp', this)`
+10. En el archivo **game.js** , para la función
+`update`, cambiamos :  
+`sound.add('gameover', { volume: 0.2 }).play()`
+por `playAudio('gameover', this, { volume: 0.2 })`
+11. Quitamos el `try/catch` en la función `update`
+para el sonido de `gameover` en **game.js**.
+12. Quitamos en la función `update` de **game.js**
+ el `sound` del contexto, para quedar así:
+```js
+  const { mario, scene } = this
 ```
