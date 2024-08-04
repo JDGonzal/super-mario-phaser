@@ -638,6 +638,11 @@ a la izquierd como a la derecha, le ponemos un condicional con
 > 3. El programa `pnpm` es similar al `npm`, siendo un mejor empaquetador.  
 >Este lo puede conseguir con las instrucciones de este sitio
 >[pnpm Installation](https://pnpm.io/installation).  
+>Instalamos las extensiones:
+> * [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) 
+>de [Microsoft](https://www.microsoft.com/es-co/).
+> * [Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+>de [Prettier](https://prettier.io/)
 
 1. En una `TERMINAL` del `Visual Studio Code`, ponemos este comando:
 ```gitbash
@@ -690,4 +695,171 @@ quedando el **package.json** así:
       "no-undef": "error"
     }
   }
+```
+
+## 15. Refactorizando
+1. Creamos en la carpeta "src\javascript" el 
+archivo **controles.js**.
+2. Empezamos con este código:
+```js
+export function checkControls({mario, keys}){
+
+}
+```
+>[!CAUTION]  
+>Nos aparece un error en pantalla relacionado 
+>con el `module`, la solución por ahora fue 
+>borrar el archivo **.eslintrc.json**.  
+>
+>Esto solicita hacer cambios como quitar los
+>punto-y-coma `;` y cambiar las comillas
+>dobles `"` por las sencillas `'`.
+
+>[!WARNING]  
+>En el archivo **game.js**, tengo dos errores
+>de `lint`, en estos sitios:
+> * ` type: Phaser.AUTO, `
+> * `new Phaser.Game(config)`
+
+3. Cambiar en **game.js** el contexto inicial de 
+`const { keys, mario, sound, scene } = this;`
+a `const { mario, sound, scene } = this;`
+
+4. Ponemos esto en el archivo **controles.js**:
+```js
+export function checkControls({mario, keys}){
+
+  const isLeftKeyDown = keys.left.isDown;
+  const isRightKeyDown = keys.right.isDown;
+  const isUpKeyDown = keys.up.isDown;
+
+  const isMarioTouchingFloor = mario.body.touching.down;
+  
+  if (isLeftKeyDown) {
+    // Movemos a mario en el Eje `x` a menos 2 ⬅️ 
+    mario.x -= 2;
+    isMarioTouchingFloor && mario.anims.play('mario-walk', true);
+    mario.flipX = true;
+  } else if (isRightKeyDown) {
+    // Movemos a mario en el Eje `x` mas 2  ➡️
+    mario.x += 2;
+    isMarioTouchingFloor && mario.anims.play('mario-walk', true);
+    mario.flipX = false;
+  } else if (isMarioTouchingFloor) {
+    mario.anims.play('mario-idle', true);
+  }
+
+  if (isUpKeyDown && isMarioTouchingFloor) {
+    // Movemos a mario en el Eje `y` a -300 de velocidad  ⬆️
+    mario.setVelocityY(-300);
+    mario.anims.play('mario-jump', true);
+  }
+}
+```
+5. Verificamos que lo de **controles.js** no
+esté en **game.js** (se MUEVE, no simple copia).
+6. Importamos la función exportada de `controles`
+en el archivo **game.js**:  
+`import { checkControls } from './controles.js';`
+7. En la función `update` , hacemos el llamado:  
+`checkControls(this);`
+
+## 16. Agregando el primer enemigo
+1. Cargando a `goomba` como un `spreedsheet`
+en el archivo **game.js** para la función
+`preload`:
+```js
+  this.load.spritesheet(
+    'goomba',
+    './assets/entities/overworld/goomba.png',
+    { frameWidth: 16, frameHeight: 16}
+  )
+```
+2. En la función `create` para **game.js**, 
+después de que aparezca mario, ponemos a `goomba`
+```js
+  this.goomba = this.physics.add
+    .sprite(120, config.height - 16 * 2, 'goomba')
+    .setOrigin(0, 1)
+    .setGravityY(500)
+    .setVelocityX(-50)
+```
+3. Ponemos la colisión de `goomba` contra el 
+`floor`:
+```js
+  this.physics.add.collider(this.goomba, this.floor)
+```
+4. Para el momento de la colisión entre `mario`
+y `goomba`, hacemos un callback:
+```js
+  this.physics.add.collider(this.mario, this.goomba,
+    onHitEnemy
+  )
+```
+5. Debajo del `create`, ponemos una función
+llamada `onHitEnemy`:
+```js
+function onHitEnemy(mario, goomba) {
+  if (mario.body.touching.down && goomba.body.touching.up) {
+    goomba.destroy();
+    mario.setVelocityY(-200).setVelocityX(0);
+  } else {
+    // mario muere
+  }
+}
+```
+6. Añadimos animación para `goomba` en el 
+archivo **animations.js**:
+```js
+  game.anims.create({
+    key: 'goomba-walk',
+    frames: game.anims.generateFrameNumbers(
+      'goomba',
+      { start: 0, end: 1 }
+    ),
+    frameRate: 12,
+    repeat: -1
+  })
+```
+7. Justo depués de `createAnimations(this)`
+colocamos el `play` de `goomba`:
+```js
+  this.goomba.anims.play('goomba-walk', true)
+```
+8. Añadimos las animación cuando el `goomba`
+muere:
+```js
+  game.anims.create({
+    key: 'goomba-hurt',
+    frames:[{ key: 'goomba', frame: 2 }]
+  })
+```
+9. En la función `onHitEnemy`, cambio varias cosas:  
+```js
+function onHitEnemy (mario, goomba) {
+  if (mario.body.touching.down && goomba.body.touching.up) {
+    goomba.anims.play('goomba-hurt', true)
+    goomba.setVelocityX(0)
+    mario.setVelocityY(-200).setVelocityX(0)
+    // Espero un tiempo para destruirlo
+    setTimeout(() => {
+      goomba.destroy()
+    }, 500)
+  } else {
+    // mario muere
+  }
+}
+```
+10. Cargo el sonido de `goomba-stomp` en
+el `preload` de **game.js**:
+```js
+  this.load.audio('goomba-stomp', './assets/sound/effects/goomba-stomp.wav')
+```
+11. La colisión de `mario` con `goomba`
+le paso mas parámtros :  
+`this.physics.add.collider(this.mario, this.goomba, onHitEnemy, null, this)`
+12. En la función `onHitEnemy`, añado el 
+sonido del aplastamineto de `goomba`:
+```js
+  this.sound.play('goomba-stomp')
 ```
