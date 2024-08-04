@@ -625,3 +625,69 @@ y reemplazamos donde aparece: `mario.body.touching.down`
 a la izquierd como a la derecha, le ponemos un condicional con
 `&&`, ejemplo:  
 `isMarioTouchingFloor && mario.anims.play('mario-walk', true);`
+
+## 15. Añadimos el LINT
+>[!TIP]
+> 1. Instalar `nvm` descargando el instalador desde este sitio:
+>[nvm-setup.exe](https://github.com/coreybutler/nvm-windows/releases/download/1.1.12/nvm-setup.exe).
+> 2. Instalar el `node`, que a su vez
+>trae el `npm` basado en este sitio: 
+>[Instalar múltiples versiones de Node.js en Windows](https://rafaelneto.dev/blog/instalar-multiples-versiones-nodejs-windows/).  
+>Con el `nvm` permite múltiples versiones
+>del `node`.
+> 3. El programa `pnpm` es similar al `npm`, siendo un mejor empaquetador.  
+>Este lo puede conseguir con las instrucciones de este sitio
+>[pnpm Installation](https://pnpm.io/installation).  
+
+1. En una `TERMINAL` del `Visual Studio Code`, ponemos este comando:
+```gitbash
+pnpm install standard -D
+```
+ó
+```gitbash
+npm i standard -D
+```
+>[!NOTE]  
+>De preferencia el primero(`pnpm`) pero en caso que falle, 
+>seguir usando el segundo(`npm`).
+
+>[!TIP]  
+>Este proceso crea la carpeta "node_modules" y dos archivos:
+> * **package.json**
+> * **package-lock.json**
+>
+> El archivo **package.json** debe tener un
+> contenido similar a este:
+>```json
+>{
+>  "devDependencies": {
+>    "standard": "^17.1.0"
+>  }
+>}
+>```
+
+2. Añadimos al **package.json**, este contenido, a partir de la línea 2,
+quedando el **package.json** así:
+```json
+{
+  "eslintConfig": {
+    "extends" : "standard"
+  },
+  "devDependencies": {
+    "standard": "^17.1.0"
+  }
+}
+```
+3. Creo el archivo **.eslintrc.json** 
+(OJO: El archivo empieza con el punto) y ponemos este texto:
+```json
+{
+    "parserOptions": {
+      "ecmaVersion": 2020
+    },
+    "rules": {
+      "no-unused-vars": "error",
+      "no-undef": "error"
+    }
+  }
+```
