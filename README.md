@@ -1,8 +1,7 @@
 # SUPER-MARIO-PHASER-01
 Basado en este video: 
 
-![midulive-20240718](images/2024-07-25_185845.png "Tutorial del juego SUPER MARIO BROS con HTML CSS JavaScript | Curso de Videojuegos")  
-https://www.youtube.com/watch?v=RBYCgS8Et7Y
+[![midulive-20240718](images/2024-07-25_185845.png "Tutorial del juego SUPER MARIO BROS con HTML CSS JavaScript | Curso de Videojuegos")](https://www.youtube.com/watch?v=RBYCgS8Et7Y)
 
 >[!IMPORTANT] 
 > * El código original está en este repositorio: 
@@ -560,8 +559,7 @@ de 7 segundos, lo que dura el sonido anterior, en **game.js** al final de la con
 # SUPER-MARIO-PHASER-02
 Basado en este video: 
 
-![midulive-20240718](images/2024-08-02_164203.png "Creando Super Mario Bros: Agregar monedas, colisiones con el enemigo, animaciones y más")  
-https://www.youtube.com/watch?v=kPgDqdCdjfE
+[![midulive-20240718](images/2024-08-02_164203.png "Creando Super Mario Bros: Agregar monedas, colisiones con el enemigo, animaciones y más")](https://www.youtube.com/watch?v=kPgDqdCdjfE)
 
 ## 14. Correcciones de sonido y salto
 1. Algo podremos intentar solucionar con el audio, poniéndolo
@@ -638,7 +636,7 @@ a la izquierd como a la derecha, le ponemos un condicional con
 > 3. El programa `pnpm` es similar al `npm`, siendo un mejor empaquetador.  
 >Este lo puede conseguir con las instrucciones de este sitio
 >[pnpm Installation](https://pnpm.io/installation).  
->Instalamos las extensiones:
+>4. Instalamos las extensiones en `Visual Studio Code`:
 > * [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) 
 >de [Microsoft](https://www.microsoft.com/es-co/).
 > * [Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
@@ -659,7 +657,7 @@ npm i standard -D
 >[!TIP]  
 >Este proceso crea la carpeta "node_modules" y dos archivos:
 > * **package.json**
-> * **package-lock.json**
+> * **package-lock.json** ó **pnpm-lock.yaml**
 >
 > El archivo **package.json** debe tener un
 > contenido similar a este:
@@ -671,8 +669,9 @@ npm i standard -D
 >}
 >```
 
-2. Añadimos al **package.json**, este contenido, a partir de la línea 2,
-quedando el **package.json** así:
+2. Añadimos al **package.json**, el contenido de:  
+`"eslintConfig": { "extends" : "standard" },`, a partir de 
+la línea 2, quedando el **package.json** así:
 ```json
 {
   "eslintConfig": {
@@ -927,4 +926,111 @@ para el sonido de `gameover` en **game.js**.
  el `sound` del contexto, para quedar así:
 ```js
   const { mario, scene } = this
+```
+
+>[!TIP]  
+>El tema del LINT o ESLINT, me ha estado rondando, hallé un
+>mejor formato para el archivo **.eslintrc.json**, y un video 
+>con un ejemplo mas acorde lo requrido:  
+>[![ESLint Configuración y uso](images/2024-08-05_152909.png "ESLint Configuración y uso")](https://www.youtube.com/watch?v=bClwMhv50aI).  
+> 1. Tener el nodejs instalado (Visto en [15. Añadimos el LINT](#15-añadimos-el-lint) ).
+> 2. Desinstalar el `standard`:  
+> `npm uninstall standard -D` ó `pnpm uninstall standard -D`.
+> 3. Borrar la carpeta "node_modules".
+> 4. Borrar estos 2 archivos:
+> * **package-lock.json** y/o **pnpm-lock.yaml**
+> * **package.json**
+> 5. Instalar (ojalá con `pnpm`), estos 2 en modo `dev`:
+>```bash
+>pnpm i eslint-config-airbnb-base -D 
+>pnpm i eslint-plugin-import -D
+>```
+> * Si le falla `pnpm` , hace lo mismo con `npm`.
+> 6. Así debe quedar el **package.json**:
+>```json
+>	{
+>	  "devDependencies": {
+>	    "eslint-config-airbnb-base": "^15.0.0",
+>	    "eslint-plugin-import": "^2.29.1"
+>		}
+>	},
+>```
+> 7. Creamos de nuevo el archivo **.eslintrc.json**, con esto:
+>```json
+>	{
+>	  "env": {
+>	    "browser": true,
+>	    "es2020": true
+>	  },
+>	"config": {}  "extends": [
+>	    "airbnb-base"
+>	  ],
+>	  "parserOptions": {
+>	"ecmaVersion": 11
+>	  },
+>	"rules": {
+>	    "linebreak-style": "off",
+>	    "eslint-plugin-import/extensions": true,
+>	    "switch-colon-spacing": "error",
+>	    "no-restricted-imports": "warn"
+>	  }
+>	}
+>```
+> 8. Presiono en `Visual Studio Code` las teclas: 
+> [`Ctrl`] + [`Shift`] + [`P`]  
+> y selecciono o busco `Restart ESLint Server`
+
+## 18. Hacer que el `goomba` mate al `mario`
+1. Creamos en **game.js** debajo de `update` la función:
+`killMario`, y movemos todo lo del `update` relacionado con
+la muerte:
+```js
+function killMario(game){
+    //  La muerte de `mario`
+    game.mario.isDead = true;
+    game.mario.anims.play('mario-dead', false);
+    game.mario.setCollideWorldBounds(false);
+    playAudio('gameover', game, { volume: 0.2 });
+
+    setTimeout(() => {
+      game.mario.setVelocityY(-250);
+    }, 100);
+
+    setTimeout(() => {
+      game.scene.restart();
+    }, 7000);
+}
+```
+2. Este sería todo el `update`:
+```js
+function update() {
+  if (this.mario.isDead) return;
+  checkControls(this);
+
+  if (this.mario.y >= config.height - 12) {
+    killMario(this);
+  }
+}
+```
+3. Podemos sacar el `mario` y la `scene` del `game` en la 
+función `killMario` de **game.js**:
+```js
+  const {mario, scene} = game;
+```
+4. De ahi para abajo , borramos todo lo que diga `game.` 
+(OJO: con el gunto al final).
+5. De nuevo en la función `killMario`, ponemos un `return` si
+`mario` está muerto:  
+`if (mario.isDead) return;`
+6. En la función `onHitEnemy`, para el `else`, llamamos
+el `killMario`.
+7. Evitamos que `mario` detecte las colisiones en la función
+ `killMario` debajo del `playAudio('gameover'...)`:
+```js
+	mario.body.checkCollision.none = true;
+```
+8. En el `killMario` a `mario` le ponemos la velocidad `X` en
+cero.
+```js
+	mario.setVelocityX(0);
 ```

@@ -1,8 +1,6 @@
 {
-  "eslintConfig": {
-    "extends" : "standard"
-  },
   "devDependencies": {
-    "standard": "^17.1.0"
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.29.1"
   }
 }
