@@ -4,6 +4,7 @@
 import { createAnimations } from './animations.js';
 import { checkControls } from './controles.js';
 import { initAudio, playAudio } from './audio.js';
+import { initSpritesheet } from './spritesheet.js';
 
 const config = {
   autoFocus: false,
@@ -30,28 +31,28 @@ new Phaser.Game(config); // `this` -> Game -> el Juego
 
 function preload() {
   this.load.image('cloud1', './assets/scenery/overworld/cloud1.png')
-  this.load.spritesheet('mario', './assets/entities/mario.png', {
-    frameWidth: 18,
-    frameHeight: 16
-  });
+
   this.load.image('floorbricks', './assets/scenery/overworld/floorbricks.png');
-  this.load.spritesheet('goomba', './assets/entities/overworld/goomba.png', {
-    frameWidth: 16,
-    frameHeight: 16
-  });
+
+  initSpritesheet(this);
 
   initAudio(this);
 }
 
 function create() {
-  this.add.image(100, 50, 'cloud1').setOrigin(0, 0).setScale(0.15);
+
+  createAnimations(this);
+
+  this.add.image(100, 50, 'cloud1')
+    .setOrigin(0, 0)
+    .setScale(0.15);
 
   // this.add.tileSprite(0, config.height - 32,
   // config.width, 32,
   //   'floorbricks')
   //   .setOrigin(0, 0);
 
-  this.floor = this.physics.add.staticGroup()
+  this.floor = this.physics.add.staticGroup();
 
   this.floor
     .create(0, config.height - 32, 'floorbricks')
@@ -86,23 +87,38 @@ function create() {
     .setOrigin(0, 1)
     .setGravityY(500)
     .setVelocityX(-50);
+  this.goomba.anims.play('goomba-walk', true);
+
+  this.coins = this.physics.add.staticGroup();
+  this.coins.create(150, 150, 'coins')
+    .anims.play('coin-idle', true);
+  this.coins.create(300, 150, 'coins')
+    .anims.play('coin-idle', true);
+  this.coins.create(450, 150, 'coins')
+    .anims.play('coin-idle', true);
+  this.physics.add.overlap(this.mario, this.coins,
+    collectCoins, null, this);
 
   this.physics.add.collider(this.mario, this.floor);
   this.physics.add.collider(this.goomba, this.floor);
   this.physics.add.collider(this.mario, this.goomba,
     onHitEnemy, null, this);
 
-  this.physics.world.setBounds(0, 0, config.width * 2, config.height);
+  this.physics.world
+    .setBounds(0, 0, config.width * 2, config.height);
 
-  this.cameras.main.setBounds(0, 0, config.width * 2, config.height);
+  this.cameras.main
+    .setBounds(0, 0, config.width * 2, config.height);
 
   this.cameras.main.startFollow(this.mario);
 
   this.keys = this.input.keyboard.createCursorKeys();
 
-  createAnimations(this);
+}
 
-  this.goomba.anims.play('goomba-walk', true);
+function collectCoins(mario, coin) {
+  coin.destroy(); //coin.disableBody(true, true);
+  playAudio('coin-pickup', this, { volume: 0.1 });
 }
 
 function onHitEnemy(mario, goomba) {

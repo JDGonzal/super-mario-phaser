@@ -1034,3 +1034,126 @@ cero.
 ```js
 	mario.setVelocityX(0);
 ```
+
+## 19. Agregando Monedas
+
+1. Creamos el archivo **spritesheet.js** en la carpeta
+"src/javascript".
+2. Empezamos con un `export`:
+```js
+export const initSpritesheet = ({ }) => {
+
+}
+```
+3. Movemos de **game.js**, lo de la función `preload`, lo
+relacionado con `spritesheet` y tomando el `load` como
+parámetro a extraer:
+```js
+export const initSpritesheet = ({ load }) => {
+  load.spritesheet('mario', './assets/entities/mario.png', {
+    frameWidth: 18,
+    frameHeight: 16
+  });
+
+  load.spritesheet('goomba', './assets/entities/overworld/goomba.png', {
+    frameWidth: 16,
+    frameHeight: 16
+  });
+}
+```
+4. Importamos en **game.js**, lo de `initSpritesheet`:  
+`import { initSpritesheet } from './spritesheet.js';`
+5. Y en el `preload` llamamos dicha función:  
+`initSpritesheet(this);`
+6. En el archivo **spritesheet.js**, hacemos una `const`
+llamada `INIT_SPRITSHEETS`, con este valor:
+```js
+const INIT_SPRITSHEETS = [
+  {
+    key: 'mario',
+    path: './assets/entities/mario.png',
+    frameWidth: 18,
+    frameHeight: 16
+  },
+  {
+    key: 'goomba',
+    path: './assets/entities/overworld/goomba.png',
+    frameWidth: 16,
+    frameHeight: 16
+  }
+]
+```
+7. La parte de inicializar se la dejamos a un `forEach`:
+```js
+export const initSpritesheet = ({ load }) => {
+  INIT_SPRITSHEETS.forEach(
+    ({ key, path, frameWidth, frameHeight }) => {
+      load.spritesheet(key, path, { frameWidth, frameHeight });
+    });
+}
+```
+8. A la `const` llamada `INIT_SPRITSHEETS` de 
+**spritesheeet.js**, añadimos otro q seran las `coin`:
+```js
+  {
+    key: 'coin',
+    path: './assets/collectibles/coin.png',
+    frameWidth: 16,
+    frameHeight: 16
+  }
+```
+9. Creamos la animación en el archivo **animations.js**:
+```js
+  game.anims.create({
+    key: 'coin-idle',
+    frames: game.anims.generateFrameNumbers(
+      'coin',
+      { start: 0, end: 3 }
+    ),
+    frameRate: 12,
+    repeat: -1
+  });
+```
+10. Para que parezcan las moneda en el `create` de **game.js**
+Creamos un `staticGroup`, debajo de la creacion de 
+`this.goomba`:
+```js
+  this.coins.create(150, 150, 'coins')
+    .anims.play('coin-idle', true);
+```
+11. Subimos al principio de la función `create` el llamado
+de `createAnimations(this);`
+12. Ponemos otras dos monedas:
+```js
+  this.coins.create(300, 150, 'coins')
+    .anims.play('coin-idle', true);
+  this.coins.create(450, 150, 'coins')
+    .anims.play('coin-idle', true);
+```
+13. Hacemos un tipo de colisión que es algo diferente llamada
+`overlap`:
+```js
+  this.physics.add.overlap(this.mario, this.coins,
+    collectCoins, null, this);
+```
+14. Creamos la función `collectCoins`, con esto:
+```js
+function collectCoins(mario, coin) {
+  coin.destroy();
+}
+```
+15. En el archio **audio.js**, añadimos otro elemento a la
+`INIT_AUDIOS`:
+```js
+  {
+    key: 'coin-pickup',
+    path: './assets/sound/effects/coin.mp3'
+  }
+```
+16. Así queda por ahora el `collectCoins`:
+```js
+function collectCoins(mario, coin) {
+  coin.destroy(); //coin.disableBody(true, true);
+  playAudio('coin-pickup', this, { volume: 0.1 });
+}
+```
