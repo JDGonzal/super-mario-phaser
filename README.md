@@ -1482,3 +1482,60 @@ condicional a la hora de dar la animación:
     ? 'mario-grown-dead'
     : 'mario-dead', false);
 ```
+20. El `mario.isGrown = true;`, lo ponemos abajo dentro de
+un `setTimeout`, junto con la activación de todo, esta
+condicional `if (key === 'supermushroom')`, quedaría:
+```js
+ else if (key === 'supermushroom') {
+    this.physics.world.pause();
+    this.anims.pauseAll();
+
+    mario.isBlocked = true;
+
+    let i = 0;
+    const interval = setInterval(() => {
+      mario.anims.play(i % 2 === 0
+        ? 'mario-grown-idle'
+        : 'mario-idle', true);
+      i++;
+    }, 100);
+
+    setTimeout(() => {
+      mario.isGrown = true;
+      mario.isBlocked = false;
+      clearInterval(interval);
+      this.physics.world.resume();
+      this.anims.resumeAll();
+    }, 1000);
+  }
+```
+20. En **controles.js**, ponemos un `return` si `mario` tiene
+`isBlocked`.
+21. Añadimos el Sonido en **sounds.js**:
+```js
+  {
+    key: 'powerup',
+    path: './assets/sound/effects/consume-powerup.mp3',
+  },
+```
+22. hacemos el `play` de `powerup`, en **game.js** después
+de `mario.isBlocked = true;`:  
+`playAudio('powerup', this, { volume: 0.3 });`
+>[!WARNING]  
+>El `mario` es mas grande, y este se ve enterrarse en el
+>piso, hay que decirle que el tamaño del cuerpo cambió
+
+23. En el `setTimeout`, cambiamos ese tamaño:
+```js
+    setTimeout(() => {
+      mario.isGrown = true;
+      mario.isBlocked = false;
+      mario.setTexture('mario-grown');
+      mario.setGravityY(300);
+      mario.setDisplaySize(18, 32);
+      mario.body.setSize(18, 32);
+      clearInterval(interval);
+      this.physics.world.resume();
+      this.anims.resumeAll();
+    }, 1000);
+```

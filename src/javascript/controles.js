@@ -20,6 +20,7 @@ export function checkControls ({ mario, keys }) {
 
   // Si mario esta muerto de una un `return`
   if (mario.isDead) return;
+  if (mario.isBlocked) return;
 
   // Separamos el valor de normal o crecido
   const marioAnimations = mario.isGrown
