@@ -34,6 +34,8 @@ function preload () {
 
   this.load.image('floorbricks', './assets/scenery/overworld/floorbricks.png');
 
+  this.load.image('supermushroom', './assets/collectibles/super-mushroom.png');
+
   initSpritesheet(this);
 
   initAudio(this);
@@ -86,11 +88,13 @@ function create () {
     .setVelocityX(-50);
   this.goomba.anims.play('goomba-walk', true);
 
-  this.coins = this.physics.add.staticGroup();
-  this.coins.create(150, 150, 'coins').anims.play('coin-idle', true);
-  this.coins.create(300, 150, 'coins').anims.play('coin-idle', true);
-  this.coins.create(450, 150, 'coins').anims.play('coin-idle', true);
-  this.physics.add.overlap(this.mario, this.coins, collectCoins, null, this);
+  this.collectibles = this.physics.add.staticGroup();
+  this.collectibles.create(150, 150, 'coins').anims.play('coin-idle', true);
+  this.collectibles.create(300, 150, 'coins').anims.play('coin-idle', true);
+  this.collectibles.create(450, 150, 'coins').anims.play('coin-idle', true);
+  this.collectibles.create(350, config.height - 16 * 4, 'supermushroom');
+
+  this.physics.add.overlap(this.mario, this.collectibles, collectItems, null, this);
 
   this.physics.add.collider(this.mario, this.floor);
   this.physics.add.collider(this.goomba, this.floor);
@@ -105,11 +109,28 @@ function create () {
   this.keys = this.input.keyboard.createCursorKeys();
 }
 
-function collectCoins (mario, coin) {
-  coin.destroy(); // coin.disableBody(true, true);
-  playAudio('coin-pickup', this, { volume: 0.1 });
+function collectItems (mario, item) {
+  const { texture: { key } } = item;
+  item.destroy(); // item.disableBody(true, true);
 
-  addToScore(100, coin, this);
+  if (key === 'coin') {
+    playAudio('coin-pickup', this, { volume: 0.1 });
+
+    addToScore(100, item, this);
+  } else if (key === 'supermushroom') {
+    mario.isGrown = true;
+
+    let i = 0;
+    setInterval(() => {
+      mario.anims.play(i % 2 === 0
+        ? 'mario-grown-idle'
+        : 'mario-idle', true);
+      i++;
+    }, 100);
+    mario.isBlocked = true;
+    this.physics.world.pause();
+    this.anims.pauseAll();
+  }
 }
 
 function addToScore (scoreToAdd, origin, game) {
@@ -172,7 +193,9 @@ function killMario (game) {
   if (mario.isDead) return;
 
   mario.isDead = true;
-  mario.anims.play('mario-dead', false);
+  mario.anims.play(mario.isGrown
+    ? 'mario-grown-dead'
+    : 'mario-dead', false);
   mario.setCollideWorldBounds(false);
   playAudio('gameover', game, { volume: 0.2 });
 
