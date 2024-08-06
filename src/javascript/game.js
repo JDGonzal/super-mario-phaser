@@ -110,7 +110,9 @@ function create () {
 }
 
 function collectItems (mario, item) {
-  const { texture: { key } } = item;
+  const {
+    texture: { key },
+  } = item;
   item.destroy(); // item.disableBody(true, true);
 
   if (key === 'coin') {
@@ -118,28 +120,38 @@ function collectItems (mario, item) {
 
     addToScore(100, item, this);
   } else if (key === 'supermushroom') {
-    mario.isGrown = true;
-
-    let i = 0;
-    setInterval(() => {
-      mario.anims.play(i % 2 === 0
-        ? 'mario-grown-idle'
-        : 'mario-idle', true);
-      i++;
-    }, 100);
-    mario.isBlocked = true;
     this.physics.world.pause();
     this.anims.pauseAll();
+
+    mario.isBlocked = true;
+    playAudio('powerup', this, { volume: 0.3 });
+
+    let i = 0;
+    const interval = setInterval(() => {
+      mario.anims.play(i % 2 === 0 ? 'mario-grown-idle' : 'mario-idle', true);
+      i++;
+    }, 100);
+
+    setTimeout(() => {
+      mario.isGrown = true;
+      mario.isBlocked = false;
+      mario.setTexture('mario-grown');
+      mario.setGravityY(300);
+      mario.setDisplaySize(18, 32);
+      mario.body.setSize(18, 32);
+      clearInterval(interval);
+      this.physics.world.resume();
+      this.anims.resumeAll();
+    }, 1000);
   }
 }
 
 function addToScore (scoreToAdd, origin, game) {
   // Pone el Puntaje ganado al recuperar la moneda
-  const scoreText = game.add.text(
-    origin.x, origin.y, scoreToAdd, {
-      fontFamily: 'pixel',
-      fontSize: config.width / 40,
-    });
+  const scoreText = game.add.text(origin.x, origin.y, scoreToAdd, {
+    fontFamily: 'pixel',
+    fontSize: config.width / 40,
+  });
   // Animación para enviar hacia arriba el número
   game.tweens.add({
     targets: scoreText,
@@ -193,9 +205,7 @@ function killMario (game) {
   if (mario.isDead) return;
 
   mario.isDead = true;
-  mario.anims.play(mario.isGrown
-    ? 'mario-grown-dead'
-    : 'mario-dead', false);
+  mario.anims.play(mario.isGrown ? 'mario-grown-dead' : 'mario-dead', false);
   mario.setCollideWorldBounds(false);
   playAudio('gameover', game, { volume: 0.2 });
 
