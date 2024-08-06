@@ -1306,3 +1306,179 @@ despues de `playAudio('goomba-stomp', this);`:
 ```js
 addToScore(200, goomba, this);
 ```
+
+## 21. Hacer al `mario` grande
+1. En **game.js**, cambiamos `coins` a `collectibles` en
+la función `create`.
+2. Cambiamos el nombre de la función `collectCoins` por
+`collectItems`.
+3. Cambiamos la función `collectItems` de esta manera:
+```js
+function collectItems (mario, item) {
+  if (item.texture.key === 'coin') {
+    item.destroy(); // item.disableBody(true, true);
+    playAudio('coin-pickup', this, { volume: 0.1 });
+
+    addToScore(100, item, this);
+  } else {
+    console.log(item.texture.key);
+  }
+}
+```
+4. En la función `preload` de **game.js**, añadimos el
+`supermushroom`:
+```js
+  this.load.image('supermushroom', './assets/collectibles/super-mushroom.png');
+```
+5. En la función `create` de **game.js**, añadimos el
+`supermushroom` como un `collectibles`:
+```js
+  this.collectibles.create(350, config.height - 16 * 4, 'supermushroom');
+```
+6. La colisión de los `item` ya está detectada con el 
+`overlap`, y en la función `collectItems`, hacemos estos
+cambios:
+```js
+function collectItems (mario, item) {
+  const { texture: { key } } = item;
+  item.destroy(); // item.disableBody(true, true);
+
+  if (key === 'coin') {
+    playAudio('coin-pickup', this, { volume: 0.1 });
+
+    addToScore(100, item, this);
+  } else if (key === 'supermushroom') {
+    console.log(key);
+  }
+}
+```
+7. Cargamos en el archivo **spritesheet.js** la imagen de
+ `mario-grown`:
+```js
+  {
+    key: 'mario-grown',
+    path: './assets/entities/mario-grown.png',
+    frameWidth: 18,
+    frameHeight: 32,
+  },
+```
+8. En el archivo **animations.js**, añadimos el 
+`mario-grown-idle`:
+```js
+  game.anims.create({
+    key: 'mario-grown-idle',
+    frames: [{ key: 'mario-grown', frame: 0 }],
+  });
+```
+9. En **game.js**, llamamos la animación de 
+`mario-grown-idle` dentro de `collectItems`, cambiando el
+`console.log(key);`:
+```js
+  mario.anims.play('mario-grown-idle', true);
+```
+>[!WARNING]  
+>La animación `mario-grown-idle`, se llama, pero no se produce 
+>el cambio, debemos hacer algo en el archivo **controles.js**
+10. En el archivo **game.js**, para la función `collectItems`
+le activamos una nueva variable llamada `isGrown`, para 
+`mario`:
+```js
+    mario.isGrown = true;
+```
+11. Se crea una `const` en **controles.js**, por endima de la
+función:
+```js
+const MARIO_ANIMATIONS = {
+  normal: {
+    idle: 'mario-idle',
+  },
+  grown: {
+    idle: 'mario-grown-idle',
+  },
+};
+```
+12. En el archivo **controles.js**, añadimos lo siguiente
+despues de las `const`, dentro de la función `checkControls`:
+```js
+  // Separamos el valor de normal o crecido
+  const marioAnimations = mario.isGrown
+    ? MARIO_ANIMATIONS.grown
+    : MARIO_ANIMATIONS.normal;
+```
+13. Cambiamos este texto en **controles.js**, de:  
+`mario.anims.play('mario-idle', true);` a  
+`mario.anims.play(marioAnimations.idle, true);`
+14. Añadimos a la `const` llamada `MARIO_ANIMATIONS`, los
+otros procesos de `walk` y `jump`:
+```js
+const MARIO_ANIMATIONS = {
+  normal: {
+    idle: 'mario-idle',
+    walk: 'mario-walk',
+    jump: 'mario-jump',
+  },
+  grown: {
+    idle: 'mario-grown-idle',
+    walk: 'mario-grown-walk',
+    jump: 'mario-grown-jump',
+  },
+};
+```
+15. Cambiamos de una vez los textos en el archivo 
+**controles.js**, por la variable `marioAnimations.`.
+16. Hacemos el parpadeo de mario creciendo en la función 
+`collectItems` de **game.js**:
+```js
+    let i = 0;
+    setInterval(() => {
+      mario.anims.play(i % 2 === 0
+        ? 'mario-grown-idle'
+        : 'mario-idle');
+      i++;
+    }, 100);
+```
+17. Pausamos las animación y que el `mario` tampoco se mueva,
+en el archivo **game.js**, en la función `collectItems`:
+```js
+    mario.isBlocked = true;
+    this.physics.world.pause();
+    this.anims.pauseAll();
+```
+>[!WARNING]  
+>En este momento acabo de caer en cuenta que el archivo
+>**controles.js** debió haberse llamado **controls.js** 
+>pero esto se va a queda así 😄.
+
+18. Dejemos hecha la animación de `mario-grown-walk`, 
+`mario-grown-jump` y `mario-grown-dead`, en el archivo
+**animations.js**:
+```js
+  game.anims.create({
+    key: 'mario-grown-walk', //  ---------> Nombre único o ID
+    frames: game.anims.generateFrameNumbers(
+      'mario-grown', //  -------------------> ID del `spritesheet`
+      { start: 1, end: 3 }, //  -------> Frames desde y hasta
+    ),
+    frameRate: 12, //  ---------------> Reduce la velocidad
+    repeat: -1, //  -------------------> Repite infinito
+  });
+  game.anims.create({
+    key: 'mario-grown-idle',
+    frames: [{ key: 'mario-grown', frame: 0 }],
+  });
+  game.anims.create({
+    key: 'mario-grown-jump',
+    frames: [{ key: 'mario-grown', frame: 5 }],
+  });
+  game.anims.create({
+    key: 'mario-grown-dead',
+    frames: [{ key: 'mario-grown', frame: 4 }],
+  });
+```
+19. En **game.js** para la función `killMario`, ponemos la 
+condicional a la hora de dar la animación:
+```js
+  mario.anims.play(mario.isGrown
+    ? 'mario-grown-dead'
+    : 'mario-dead', false);
+```
