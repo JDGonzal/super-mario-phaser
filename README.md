@@ -927,7 +927,7 @@ para el sonido de `gameover` en **game.js**.
 ```js
   const { mario, scene } = this
 ```
-
+<!--
 >[!TIP]  
 >El tema del LINT o ESLINT, me ha estado rondando, hallé un
 >mejor formato para el archivo **.eslintrc.json**, y un video 
@@ -979,6 +979,7 @@ para el sonido de `gameover` en **game.js**.
 > 8. Presiono en `Visual Studio Code` las teclas: 
 > [`Ctrl`] + [`Shift`] + [`P`]  
 > y selecciono o busco `Restart ESLint Server`
+-->
 
 ## 18. Hacer que el `goomba` mate al `mario`
 1. Creamos en **game.js** debajo de `update` la función:
@@ -1156,4 +1157,106 @@ function collectCoins(mario, coin) {
   coin.destroy(); //coin.disableBody(true, true);
   playAudio('coin-pickup', this, { volume: 0.1 });
 }
+```
+
+>[!TIP]  
+> ### Mejora del ESLINT o LINT
+> 1. Tener el nodejs instalado (Visto en [15. Añadimos el LINT](#15-añadimos-el-lint) ).
+> 2. Tener instalado como vimos en ese mismo paso el paquete
+> de `standard`:  
+>`pnpm install standard -D` ó `npm i standard -D`
+> 3. Corregir el **package.json**, para que solo tenga esto:
+>```json
+> {
+>   "devDependencies": {
+>     "standard": "^17.1.0"
+>   }
+> }
+>```
+> 4. Este sería el archivo **.eslintrc.json**:
+>```json
+> {
+> "extends": ["standard"],
+>   "rules": {
+>     "semi" : [2, "always"],
+>     "comma-dangle": [2, "always-multiline"] 
+>   }
+> }
+>```
+> 5. La extensión de `Prettier` (Visto en [15. Añadimos el LINT](#15-añadimos-el-lint) ), requiere ajustes, estos 
+>se pueden hacer en el archivo de configuracion del usuario:  
+>Presiono en `Visual Studio Code` las teclas: 
+> [`Ctrl`] + [`Shift`] + [`P`]  
+> y selecciono o busco `Open User Settings (JSON)`
+>```json
+>	"prettier.jsxSingleQuote": true,
+>	"prettier.singleQuote": true,
+>	"prettier.eslintIntegration": true,
+>	"prettier.spaceParenthesis": true,
+>	"[javascript]": {
+>		"editor.defaultFormatter": "esbenp.prettier-vscode"
+>	},
+>	"[json]": {
+>		"editor.defaultFormatter": "esbenp.prettier-vscode"
+>	},
+>```
+> 6. Presiono en `Visual Studio Code` las teclas: 
+> [`Ctrl`] + [`Shift`] + [`P`]  
+> y selecciono o busco `Restart ESLint Server`
+> 7. El Formato en `Visual Studio Code` se invoca con las teclas :  
+>[`Alt`] + [`Shift`] + [`F`] 
+> * Este proceso aplicó un nuevo formato a todos los archivos
+> ***.js**
+
+## 20.Agregar puntuación al coleccionar monedas
+1. Utilizamos los fonts que están en la carpeta 
+"src/assets/fonts", Añadimos esto al **index.html**, justo
+debajo de `<style>`:
+```html
+    @font-face {
+      font-family: "pixel";
+      src: url("/src/assets/fonts/SuperMario.ttf");
+    }
+```
+2. En el archivo **index.html**, dentro de `<style>` en
+la deficnición del `body {`, agregamos:
+```html
+      font-family: "pixel", sans-serif;
+```
+3. En el archivo **game.js**, en la función 
+`collectCoins`, añadimos un texto en pantalla:
+```js
+  this.add.text(coin.x, coin.y, 100, {
+    fontFamily: 'pixel',
+    fontSize: config.width / 40,
+  });
+```
+4. Hacemos animación para enviar hacia arriba el número:
+```js
+  this.tweens.add({
+    targets: scoreText,
+    duration: 500,
+    y: scoreText.y - 100,
+  });
+```
+5. Añadimos un callback a esta animación de `tweens`, 
+quedanto toda la animación así:
+```js
+  this.tweens.add({
+    targets: scoreText,
+    duration: 500,
+    y: scoreText.y - 100,
+    onComplete: () => {
+      // Añadimos otra animación para cambiar la opacidad
+      this.tweens.add({
+        targets: scoreText,
+        duration: 100,
+        alpha: 0,
+        // Destruimos por completo el texto
+        onComplete: () => {
+          scoreText.destroy();
+        },
+      });
+    },
+  });
 ```

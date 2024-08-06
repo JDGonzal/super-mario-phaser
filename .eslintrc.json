@@ -1,18 +1,7 @@
 {
-  "env": {
-    "browser": true,
-    "es2020": true
-  },
-  "extends": [
-    "airbnb-base"
-  ],
-  "parserOptions": {
-    "ecmaVersion": 11
-  },
+	"extends": ["standard"],
   "rules": {
-    "linebreak-style": "off",
-    "eslint-plugin-import/extensions": true,
-    "switch-colon-spacing": "error",
-    "no-restricted-imports": "warn"
+    "semi" : [2, "always"],
+    "comma-dangle": [2, "always-multiline"] 
   }
 }
