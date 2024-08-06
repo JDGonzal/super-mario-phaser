@@ -17,20 +17,20 @@ const config = {
     default: 'arcade', // box2d, chipmunk, ninja, p2
     arcade: {
       gravity: { y: 300 },
-      debug: false
-    }
+      debug: false,
+    },
   },
   scene: {
     preload, // Fn se ejecuta para precargar recursos
     create, // Fn se ejecuta cuando el juego comienza
-    update // Fn se ejecuta en cada frame
-  }
-}
+    update, // Fn se ejecuta en cada frame
+  },
+};
 
 new Phaser.Game(config); // `this` -> Game -> el Juego
 
-function preload() {
-  this.load.image('cloud1', './assets/scenery/overworld/cloud1.png')
+function preload () {
+  this.load.image('cloud1', './assets/scenery/overworld/cloud1.png');
 
   this.load.image('floorbricks', './assets/scenery/overworld/floorbricks.png');
 
@@ -39,13 +39,10 @@ function preload() {
   initAudio(this);
 }
 
-function create() {
-
+function create () {
   createAnimations(this);
 
-  this.add.image(100, 50, 'cloud1')
-    .setOrigin(0, 0)
-    .setScale(0.15);
+  this.add.image(100, 50, 'cloud1').setOrigin(0, 0).setScale(0.15);
 
   // this.add.tileSprite(0, config.height - 32,
   // config.width, 32,
@@ -90,54 +87,70 @@ function create() {
   this.goomba.anims.play('goomba-walk', true);
 
   this.coins = this.physics.add.staticGroup();
-  this.coins.create(150, 150, 'coins')
-    .anims.play('coin-idle', true);
-  this.coins.create(300, 150, 'coins')
-    .anims.play('coin-idle', true);
-  this.coins.create(450, 150, 'coins')
-    .anims.play('coin-idle', true);
-  this.physics.add.overlap(this.mario, this.coins,
-    collectCoins, null, this);
+  this.coins.create(150, 150, 'coins').anims.play('coin-idle', true);
+  this.coins.create(300, 150, 'coins').anims.play('coin-idle', true);
+  this.coins.create(450, 150, 'coins').anims.play('coin-idle', true);
+  this.physics.add.overlap(this.mario, this.coins, collectCoins, null, this);
 
   this.physics.add.collider(this.mario, this.floor);
   this.physics.add.collider(this.goomba, this.floor);
-  this.physics.add.collider(this.mario, this.goomba,
-    onHitEnemy, null, this);
+  this.physics.add.collider(this.mario, this.goomba, onHitEnemy, null, this);
 
-  this.physics.world
-    .setBounds(0, 0, config.width * 2, config.height);
+  this.physics.world.setBounds(0, 0, config.width * 2, config.height);
 
-  this.cameras.main
-    .setBounds(0, 0, config.width * 2, config.height);
+  this.cameras.main.setBounds(0, 0, config.width * 2, config.height);
 
   this.cameras.main.startFollow(this.mario);
 
   this.keys = this.input.keyboard.createCursorKeys();
-
 }
 
-function collectCoins(mario, coin) {
-  coin.destroy(); //coin.disableBody(true, true);
+function collectCoins (mario, coin) {
+  coin.destroy(); // coin.disableBody(true, true);
   playAudio('coin-pickup', this, { volume: 0.1 });
+
+  // Pone el Puntaje ganado al recuperar la moneda
+  const scoreText = this.add.text(coin.x, coin.y, 100, {
+    fontFamily: 'pixel',
+    fontSize: config.width / 40,
+  });
+  // Animación para enviar hacia arriba el número
+  this.tweens.add({
+    targets: scoreText,
+    duration: 500,
+    y: scoreText.y - 100,
+    onComplete: () => {
+      // Añadimos otra animación para cambiar la opacidad
+      this.tweens.add({
+        targets: scoreText,
+        duration: 100,
+        alpha: 0,
+        // Destruimos por completo el texto
+        onComplete: () => {
+          scoreText.destroy();
+        },
+      });
+    },
+  });
 }
 
-function onHitEnemy(mario, goomba) {
+function onHitEnemy (mario, goomba) {
   if (mario.body.touching.down && goomba.body.touching.up) {
     goomba.anims.play('goomba-hurt', true);
     goomba.setVelocityX(0);
     mario.setVelocityY(-200).setVelocityX(0);
-    playAudio('goomba-stomp', this)
+    playAudio('goomba-stomp', this);
     // Espero un tiempo para destruirlo
     setTimeout(() => {
       goomba.destroy();
-    }, 500)
+    }, 500);
   } else {
     // mario muere
     killMario(this);
   }
 }
 
-function update() {
+function update () {
   if (this.mario.isDead) return;
   checkControls(this);
 
@@ -146,7 +159,7 @@ function update() {
   }
 }
 
-function killMario(game) {
+function killMario (game) {
   //  La muerte de `mario`
   const { mario, scene } = game;
   if (mario.isDead) return;
@@ -165,6 +178,6 @@ function killMario(game) {
   }, 100);
 
   setTimeout(() => {
-    scene.restart();  // 7 Segundos demora el sonido
+    scene.restart(); // 7 Segundos demora el sonido
   }, 7000);
 }
