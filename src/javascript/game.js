@@ -109,19 +109,24 @@ function collectCoins (mario, coin) {
   coin.destroy(); // coin.disableBody(true, true);
   playAudio('coin-pickup', this, { volume: 0.1 });
 
+  addToScore(100, coin, this);
+}
+
+function addToScore (scoreToAdd, origin, game) {
   // Pone el Puntaje ganado al recuperar la moneda
-  const scoreText = this.add.text(coin.x, coin.y, 100, {
-    fontFamily: 'pixel',
-    fontSize: config.width / 40,
-  });
+  const scoreText = game.add.text(
+    origin.x, origin.y, scoreToAdd, {
+      fontFamily: 'pixel',
+      fontSize: config.width / 40,
+    });
   // Animación para enviar hacia arriba el número
-  this.tweens.add({
+  game.tweens.add({
     targets: scoreText,
     duration: 500,
     y: scoreText.y - 100,
     onComplete: () => {
       // Añadimos otra animación para cambiar la opacidad
-      this.tweens.add({
+      game.tweens.add({
         targets: scoreText,
         duration: 100,
         alpha: 0,
@@ -140,10 +145,12 @@ function onHitEnemy (mario, goomba) {
     goomba.setVelocityX(0);
     mario.setVelocityY(-200).setVelocityX(0);
     playAudio('goomba-stomp', this);
+    addToScore(200, goomba, this);
+
     // Espero un tiempo para destruirlo
     setTimeout(() => {
       goomba.destroy();
-    }, 500);
+    }, 100);
   } else {
     // mario muere
     killMario(this);

@@ -1260,3 +1260,49 @@ quedanto toda la animación así:
     },
   });
 ```
+6. Agregamos la función `addToScore` en **game.js**, justo
+encima de `onHitEnemy`:
+```js
+function addToScore (scoreToAdd, origin, game) {
+
+}
+```
+7. Movemos todo lo nuevo desde `// Pone el Puntaje` a la funciónnueva función `addToScore`:
+```js
+function addToScore (scoreToAdd, origin, game) {
+  // Pone el Puntaje ganado al recuperar la moneda
+  const scoreText = game.add.text(
+    origin.x, origin.y, scoreToAdd, {
+      fontFamily: 'pixel',
+      fontSize: config.width / 40,
+    });
+  // Animación para enviar hacia arriba el número
+  game.tweens.add({
+    targets: scoreText,
+    duration: 500,
+    y: scoreText.y - 100,
+    onComplete: () => {
+      // Añadimos otra animación para cambiar la opacidad
+      game.tweens.add({
+        targets: scoreText,
+        duration: 100,
+        alpha: 0,
+        // Destruimos por completo el texto
+        onComplete: () => {
+          scoreText.destroy();
+        },
+      });
+    },
+  });
+}
+```
+8. Llamamos la nueva función `addToScore`, al final de 
+`collectCoins`:
+```js
+  addToScore(100, coin, this);
+```
+9. En la función `onHitEnemy` de **game.js**, añadimos esto
+despues de `playAudio('goomba-stomp', this);`:
+```js
+addToScore(200, goomba, this);
+```
